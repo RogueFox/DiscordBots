@@ -1,6 +1,7 @@
 import discord
-from discord.ext.commands import Bot
 from discord.ext import commands
+from lxml import html
+import requests
 
 Client = discord.Client()
 bot_prefix= "!"
@@ -9,7 +10,6 @@ client = commands.Bot(command_prefix=bot_prefix)
 @client.event
 async def on_ready():
     client.move_member(client,"bots")
-    print("on_ready() is working.. sorta")
     print("Bot Online!")
     print("Name: {}".format(client.user.name))
     print("ID: {}".format(client.user.id))
@@ -28,14 +28,43 @@ async def test():
     await client.say("Connected!")
 
 @client.command()
-async def getNews():
-    await client.say("Command currently under construction...\nhttps://WarThunder.com/en/news")
-
-@client.command()
 async def postNews():
     await client.say("Obtaining latest news from War Thunder...")
-    await client.say("!getNews")
-    await client.delete_message(2)
+    page = requests.get('https://warthunder.com/en/news')
+    tree = html.fromstring(page.content)
 
+    articleNames = tree.xpath('//div[contains(@class, "news-item__anons")]/a[@href]')
+
+    webLinks = []
+    for href in articleNames:
+        webLinks.append(href.attrib['href'])
+    print(webLinks)
+
+    postedArticles = open('posted_articles.txt', 'r+')
+    linkList = postedArticles.read().splitlines()
+    print(linkList)
+
+    postedList = []
+
+    for link in webLinks:
+        doNotPrint = False
+        for post in linkList:
+            if (link == post):
+                doNotPrint = True
+                break
+        if (not doNotPrint):
+            # post code here
+            print(link)
+            await client.say(link)
+            # add to posted list
+            postedList.append(link)
+
+    toBeSaved = ""
+
+    for link in postedList:
+        toBeSaved += (link + "\n")
+
+    postedArticles.write(postedArticles.read() + toBeSaved)
+    postedArticles.close()
 
 client.run("MzUyOTI5NTg0MzY4NDUxNTg1.DJCCSg.E3JTWtKNCSsIZldR229KY5IIN2M")
