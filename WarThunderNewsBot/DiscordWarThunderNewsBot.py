@@ -46,6 +46,7 @@ async def postNews():
 
     postedList = []
 
+    madeAPost = False
     for link in webLinks:
         doNotPrint = False
         for post in linkList:
@@ -54,10 +55,14 @@ async def postNews():
                 break
         if (not doNotPrint):
             # post code here
+            madeAPost = True
             print(link)
             await client.say(link)
             # add to posted list
             postedList.append(link)
+
+    if(not madeAPost):
+        await client.say("No new updates from War Thunder...")
 
     toBeSaved = ""
 
@@ -68,3 +73,4 @@ async def postNews():
     postedArticles.close()
 
 client.run("MzUyOTI5NTg0MzY4NDUxNTg1.DJCCSg.E3JTWtKNCSsIZldR229KY5IIN2M")
+input("Press ENTER to exit...")
