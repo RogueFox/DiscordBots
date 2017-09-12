@@ -72,5 +72,6 @@ async def postNews():
     postedArticles.write(postedArticles.read() + toBeSaved)
     postedArticles.close()
 
+input("Press ENTER to start...")
 client.run("MzUyOTI5NTg0MzY4NDUxNTg1.DJCCSg.E3JTWtKNCSsIZldR229KY5IIN2M")
 input("Press ENTER to exit...")
