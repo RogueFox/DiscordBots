@@ -1,38 +1,45 @@
 from lxml import html
 import requests
 
-page = requests.get('https://warthunder.com/en/news')
-tree = html.fromstring(page.content)
+class wt_news():
 
-articleNames = tree.xpath('//div[contains(@class, "news-item__anons")]/a[@href]')
+    def __init__(self):
+        print("getting news")
 
-webLinks = []
-for href in articleNames:
-    webLinks.append(href.attrib['href'])
-print(webLinks)
+    def getNews(self):
+        page = requests.get('https://warthunder.com/en/news')
+        tree = html.fromstring(page.content)
 
-postedArticles = open('posted_articles.txt', 'r+')
-linkList = postedArticles.read().splitlines()
-print(linkList)
+        articleNames = tree.xpath('//div[contains(@class, "news-item__anons")]/a[@href]')
 
-postedList = []
+        webLinks = []
+        for href in articleNames:
+            webLinks.append(href.attrib['href'])
+        print(webLinks)
 
-for link in webLinks:
-    doNotPrint = False
-    for post in linkList:
-        if(link == post):
-            doNotPrint = True
-            break
-    if(not doNotPrint):
-        #post code here
-        print(link)
-        #add to posted list
-        postedList.append(link)
+        postedArticles = open('posted_articles.txt', 'r+')
+        linkList = postedArticles.read().splitlines()
+        print(linkList)
 
-toBeSaved = ""
+        postedList = []
 
-for link in postedList:
-    toBeSaved += (link + "\n")
+        for link in webLinks:
+            doNotPrint = False
+            for post in linkList:
+                if(link == post):
+                    doNotPrint = True
+                    break
+            if(not doNotPrint):
+                #post code here
+                print(link)
+                #add to posted list
+                postedList.append(link)
 
-postedArticles.write(postedArticles.read() + toBeSaved)
-postedArticles.close()
+        toBeSaved = ""
+
+        for link in postedList:
+            toBeSaved += (link + "\n")
+
+        postedArticles.write(postedArticles.read() + toBeSaved)
+        postedArticles.close()
+        return link
