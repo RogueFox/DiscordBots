@@ -2,10 +2,18 @@ import discord
 from discord.ext import commands
 from lxml import html
 import requests
+import asyncio
+import wt_news
 
 Client = discord.Client()
 bot_prefix= "!"
 client = commands.Bot(command_prefix=bot_prefix)
+
+async def backgroundCheckNews():
+    await client.wait_until_ready()
+    while(not client.is_closed):
+        await asyncio.sleep(3600)
+        await postNewsBackground()
 
 @client.event
 async def on_ready():
@@ -29,7 +37,10 @@ async def test():
 
 @client.command()
 async def postNews():
-    await client.say("Obtaining latest news from War Thunder...")
+    await postNewsBackground()
+
+async def postNewsBackground():
+    await client.send_message(discord.Object(id='356111716792139787'),("Obtaining latest news from War Thunder..."))
     page = requests.get('https://warthunder.com/en/news')
     tree = html.fromstring(page.content)
 
@@ -46,6 +57,7 @@ async def postNews():
 
     postedList = []
 
+    madeAPost = False
     for link in webLinks:
         doNotPrint = False
         for post in linkList:
@@ -54,10 +66,14 @@ async def postNews():
                 break
         if (not doNotPrint):
             # post code here
-            print(link)
-            await client.say(link)
+            madeAPost = True
+            print("https://warthunder.com" + link)
+            await client.send_message(discord.Object(id='356111716792139787'),("https://warthunder.com" + link))
             # add to posted list
             postedList.append(link)
+
+    if(not madeAPost):
+        await client.send_message(discord.Object(id='356111716792139787'),"No new posts.")
 
     toBeSaved = ""
 
@@ -67,4 +83,7 @@ async def postNews():
     postedArticles.write(postedArticles.read() + toBeSaved)
     postedArticles.close()
 
+input("Press ENTER to start...")
+client.loop.create_task(backgroundCheckNews())
 client.run("MzUyOTI5NTg0MzY4NDUxNTg1.DJCCSg.E3JTWtKNCSsIZldR229KY5IIN2M")
+input("Press ENTER to exit...")
